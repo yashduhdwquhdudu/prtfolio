@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A responsive e-commerce front-end template with product search, filters, and a persistent cart.">
+    <title>Northline Supply | E-Commerce Template</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --ink: #17221d; --muted: #68736c; --paper: #f5f3ee; --line: #d9ddd6; --lime: #c9ef72; --orange: #e86f45; }
+        * { box-sizing: border-box; }
+        body { margin: 0; color: var(--ink); background: var(--paper); font-family: Georgia, 'Times New Roman', serif; }
+        .sans { font-family: 'Trebuchet MS', Arial, sans-serif; }
+        .topbar { background: var(--ink); color: var(--paper); font-size: .75rem; letter-spacing: .12em; text-transform: uppercase; }
+        .brand { color: var(--ink); font-size: 1.6rem; font-weight: 700; letter-spacing: -.05em; text-decoration: none; }
+        .nav-link { color: var(--muted); font-family: 'Trebuchet MS', Arial, sans-serif; font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; }
+        .nav-link:hover { color: var(--orange); }
+        .hero { background: var(--lime); min-height: 420px; overflow: hidden; position: relative; }
+        .hero h1 { font-size: clamp(3.5rem, 8vw, 7.5rem); line-height: .88; letter-spacing: -.08em; max-width: 760px; }
+        .hero-copy { max-width: 420px; font-size: 1.1rem; }
+        .hero-art { position: absolute; right: 8%; bottom: -8%; width: 290px; height: 290px; border: 2px solid var(--ink); border-radius: 50%; transform: rotate(-14deg); }
+        .hero-art::before, .hero-art::after { content: ''; position: absolute; border: 2px solid var(--ink); }
+        .hero-art::before { inset: 34px; border-radius: 50%; }
+        .hero-art::after { width: 120px; height: 170px; left: 82px; top: 55px; border-radius: 48% 48% 10% 10%; background: var(--orange); }
+        .eyebrow { color: var(--orange); font: 700 .75rem 'Trebuchet MS', Arial, sans-serif; letter-spacing: .16em; text-transform: uppercase; }
+        .section-title { font-size: clamp(2rem, 4vw, 3.4rem); letter-spacing: -.06em; }
+        .toolbar { border-bottom: 1px solid var(--line); border-top: 1px solid var(--line); }
+        .filter-btn { background: transparent; border: 0; color: var(--muted); font: 700 .75rem 'Trebuchet MS', Arial, sans-serif; letter-spacing: .1em; padding: .9rem .2rem; text-transform: uppercase; }
+        .filter-btn.active, .filter-btn:hover { color: var(--orange); }
+        .search { background: transparent; border: 0; border-bottom: 1px solid var(--ink); border-radius: 0; font: .9rem 'Trebuchet MS', Arial, sans-serif; padding: .75rem 0; }
+        .search:focus { box-shadow: none; border-color: var(--orange); }
+        .product-card { background: #fff; border: 1px solid var(--line); height: 100%; transition: transform .2s ease, box-shadow .2s ease; }
+        .product-card:hover { box-shadow: 8px 8px 0 var(--lime); transform: translate(-3px, -3px); }
+        .product-image { align-items: center; background: #e8ebe2; display: flex; height: 230px; justify-content: center; overflow: hidden; position: relative; }
+        .product-image span { color: var(--ink); font-size: 5rem; font-weight: 700; letter-spacing: -.12em; opacity: .82; transform: rotate(-8deg); }
+        .product-image.orange { background: #f5c0a8; }
+        .product-image.green { background: #b9dbcf; }
+        .product-image.blue { background: #c7d7e6; }
+        .product-body { padding: 1.2rem; }
+        .product-name { font-size: 1.35rem; letter-spacing: -.04em; }
+        .product-meta { color: var(--muted); font: .76rem 'Trebuchet MS', Arial, sans-serif; text-transform: uppercase; }
+        .price { font: 700 1rem 'Trebuchet MS', Arial, sans-serif; }
+        .add-btn { background: var(--ink); border: 1px solid var(--ink); color: #fff; font: 700 .75rem 'Trebuchet MS', Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+        .add-btn:hover { background: var(--orange); border-color: var(--orange); color: #fff; }
+        .cart-panel { background: var(--ink); color: var(--paper); }
+        .cart-count { background: var(--orange); border-radius: 50%; color: #fff; display: inline-grid; font: 700 .7rem 'Trebuchet MS', Arial, sans-serif; height: 22px; place-items: center; width: 22px; }
+        .cart-item { border-bottom: 1px solid #435048; font-family: 'Trebuchet MS', Arial, sans-serif; font-size: .85rem; }
+        .empty { color: var(--muted); font-family: 'Trebuchet MS', Arial, sans-serif; }
+        .toast-message { background: var(--lime); border: 1px solid var(--ink); bottom: 1.5rem; color: var(--ink); display: none; font: 700 .8rem 'Trebuchet MS', Arial, sans-serif; left: 50%; padding: .8rem 1.2rem; position: fixed; transform: translateX(-50%); z-index: 5; }
+        @media (max-width: 767px) { .hero { min-height: 570px; } .hero-art { bottom: -45px; right: -45px; opacity: .72; } .hero h1 { max-width: 330px; } }
+    </style>
+</head>
+<body>
+    <div class="topbar py-2 text-center sans">Free shipping on orders over $75</div>
+    <nav class="navbar navbar-expand-lg bg-white py-3" aria-label="Main navigation">
+        <div class="container">
+            <a class="brand" href="#top">northline<span style="color:var(--orange)">.</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#storeNav" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="storeNav">
+                <div class="navbar-nav ms-auto gap-lg-4 align-items-lg-center">
+                    <a class="nav-link" href="#shop">Shop</a>
+                    <a class="nav-link" href="#story">Our story</a>
+                    <a class="nav-link" href="#cart">Cart <span class="cart-count" id="cartCount">0</span></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="top">
+        <section class="hero py-5">
+            <div class="container position-relative py-5">
+                <p class="eyebrow mb-4">Objects for everyday rituals</p>
+                <h1>Good things,<br><em>well made.</em></h1>
+                <p class="hero-copy mt-4 sans">A considered collection of useful goods for slower mornings, clearer desks, and life outside the feed.</p>
+                <a href="#shop" class="btn btn-dark rounded-0 mt-3 px-4 py-3 sans">Explore the collection</a>
+                <div class="hero-art" aria-hidden="true"></div>
+            </div>
+        </section>
+
+        <section id="shop" class="container py-5">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
+                <div><p class="eyebrow mb-2">The edit / 01</p><h2 class="section-title mb-0">Shop essentials</h2></div>
+                <p class="mb-0 sans text-secondary" id="resultCount">6 products</p>
+            </div>
+            <div class="toolbar d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                <div class="d-flex gap-4" id="filters" role="group" aria-label="Filter products">
+                    <button class="filter-btn active" data-category="all">All</button>
+                    <button class="filter-btn" data-category="desk">Desk</button>
+                    <button class="filter-btn" data-category="home">Home</button>
+                    <button class="filter-btn" data-category="carry">Carry</button>
+                </div>
+                <label class="d-flex align-items-center gap-2 mb-0"><span class="visually-hidden">Search products</span><input class="search" id="searchInput" type="search" placeholder="Search products..." autocomplete="off"></label>
+            </div>
+            <div class="row g-4" id="productGrid"></div>
+        </section>
+
+        <section id="cart" class="cart-panel py-5">
+            <div class="container">
+                <div class="d-flex flex-column flex-md-row justify-content-between gap-4">
+                    <div><p class="eyebrow mb-2" style="color:var(--lime)">Your selection</p><h2 class="section-title">Shopping cart</h2><p class="sans text-white-50 mb-0">Your cart is saved between visits on this device.</p></div>
+                    <div class="flex-grow-1" style="max-width: 520px"><div id="cartItems"></div><div class="d-flex justify-content-between border-top mt-3 pt-3 sans"><strong>Total</strong><strong id="cartTotal">$0.00</strong></div><button id="checkoutBtn" class="btn rounded-0 mt-3 px-4 py-3" style="background:var(--lime); color:var(--ink); font:700 .75rem 'Trebuchet MS', Arial, sans-serif; letter-spacing:.08em;">Checkout</button></div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <div class="toast-message" id="toast" role="status"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const products = [
+            { id: 1, name: 'Daily Planner', category: 'desk', price: 24, color: 'orange', mark: '01', description: 'Undated pages for clear thinking.' },
+            { id: 2, name: 'Field Notes Set', category: 'desk', price: 16, color: 'green', mark: '02', description: 'Three pocket notebooks, ready.' },
+            { id: 3, name: 'Stoneware Mug', category: 'home', price: 32, color: 'blue', mark: '03', description: 'A calm start to any morning.' },
+            { id: 4, name: 'Linen Throw', category: 'home', price: 68, color: 'orange', mark: '04', description: 'Soft texture for quiet corners.' },
+            { id: 5, name: 'Canvas Tote', category: 'carry', price: 28, color: 'green', mark: '05', description: 'A reliable everyday companion.' },
+            { id: 6, name: 'Travel Flask', category: 'carry', price: 42, color: 'blue', mark: '06', description: 'Keeps your essentials close.' }
+        ];
+        let cart = JSON.parse(localStorage.getItem('northline-cart') || '[]');
+        let activeCategory = 'all';
+        const money = value => `$${value.toFixed(2)}`;
+        const productGrid = document.querySelector('#productGrid');
+        const resultCount = document.querySelector('#resultCount');
+        const cartCount = document.querySelector('#cartCount');
+        const cartItems = document.querySelector('#cartItems');
+        const cartTotal = document.querySelector('#cartTotal');
+        const toast = document.querySelector('#toast');
+
+        function visibleProducts() {
+            const query = document.querySelector('#searchInput').value.toLowerCase().trim();
+            return products.filter(product => (activeCategory === 'all' || product.category === activeCategory) && `${product.name} ${product.description}`.toLowerCase().includes(query));
+        }
+        function renderProducts() {
+            const visible = visibleProducts();
+            resultCount.textContent = `${visible.length} product${visible.length === 1 ? '' : 's'}`;
+            productGrid.innerHTML = visible.length ? visible.map(product => `<div class="col-sm-6 col-lg-4"><article class="product-card"><div class="product-image ${product.color}"><span aria-hidden="true">${product.mark}</span></div><div class="product-body"><div class="d-flex justify-content-between gap-3"><div><p class="product-meta mb-2">${product.category}</p><h3 class="product-name">${product.name}</h3></div><span class="price">${money(product.price)}</span></div><p class="sans text-secondary small">${product.description}</p><button class="add-btn btn rounded-0 w-100 py-3" data-add="${product.id}">Add to cart</button></div></article></div>`).join('') : '<div class="col-12"><p class="empty py-5 text-center">No products match that search.</p></div>';
+        }
+        function renderCart() {
+            const items = cart.map(id => products.find(product => product.id === id)).filter(Boolean);
+            cartCount.textContent = items.length;
+            cartItems.innerHTML = items.length ? items.map((item, index) => `<div class="cart-item d-flex justify-content-between align-items-center py-3"><span>${item.name}</span><span>${money(item.price)} <button class="btn btn-sm text-white-50 p-0 ms-2" data-remove="${index}" aria-label="Remove ${item.name}">×</button></span></div>`).join('') : '<p class="empty py-4">Your cart is waiting for something useful.</p>';
+            cartTotal.textContent = money(items.reduce((total, item) => total + item.price, 0));
+            localStorage.setItem('northline-cart', JSON.stringify(cart));
+        }
+        function showToast(message) { toast.textContent = message; toast.style.display = 'block'; window.setTimeout(() => { toast.style.display = 'none'; }, 1800); }
+        document.querySelector('#filters').addEventListener('click', event => { if (!event.target.matches('[data-category]')) return; activeCategory = event.target.dataset.category; document.querySelectorAll('.filter-btn').forEach(button => button.classList.toggle('active', button === event.target)); renderProducts(); });
+        document.querySelector('#searchInput').addEventListener('input', renderProducts);
+        productGrid.addEventListener('click', event => { const button = event.target.closest('[data-add]'); if (!button) return; cart.push(Number(button.dataset.add)); renderCart(); showToast('Added to your cart'); });
+        cartItems.addEventListener('click', event => { const button = event.target.closest('[data-remove]'); if (!button) return; cart.splice(Number(button.dataset.remove), 1); renderCart(); showToast('Removed from your cart'); });
+        document.querySelector('#checkoutBtn').addEventListener('click', () => showToast(cart.length ? 'Checkout is ready for integration' : 'Add an item before checking out'));
+        renderProducts();
+        renderCart();
+    </script>
+</body>
+</html>
